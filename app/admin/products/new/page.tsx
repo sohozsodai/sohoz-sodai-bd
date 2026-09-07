@@ -1,0 +1,1 @@
+import ProductForm from '@/components/ProductForm';export default function New(){return <><div className="adminTop"><div><h1>নতুন পণ্য</h1><p>সব তথ্য পূরণ করে Save করুন।</p></div></div><ProductForm/></>}

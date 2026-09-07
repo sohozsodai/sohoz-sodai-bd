@@ -1,0 +1,2 @@
+import {prisma} from '@/lib/prisma';import {notFound} from 'next/navigation';import StoreHeader from '@/components/StoreHeader';import ProductDetails from '@/components/ProductDetails';import {CartProvider} from '@/components/cart';
+export default async function Page({params}:{params:Promise<{id:string}>}){const {id}=await params;const p=await prisma.product.findUnique({where:{id:Number(id)}});if(!p)notFound();return <CartProvider><StoreHeader/><ProductDetails p={p}/></CartProvider>}

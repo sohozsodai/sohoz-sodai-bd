@@ -1,0 +1,1 @@
+import AdminSidebar from '@/components/AdminSidebar';export default function AdminLayout({children}:{children:React.ReactNode}){return <div className="adminLayout"><AdminSidebar/><section className="adminMain">{children}</section></div>}

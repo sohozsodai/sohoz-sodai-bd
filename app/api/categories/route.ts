@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server';import {prisma} from '@/lib/prisma';import {slugify} from '@/lib/data';
+export async function GET(){return NextResponse.json(await prisma.category.findMany({include:{subcategories:{orderBy:{sortOrder:'asc'}}},orderBy:[{sortOrder:'asc'},{name:'asc'}]}))}
+export async function POST(req:Request){const b=await req.json();if(!b.name)return NextResponse.json({error:'Category name required'},{status:400});try{return NextResponse.json(await prisma.category.create({data:{name:b.name.trim(),slug:slugify(b.slug||b.name),active:b.active!==false,sortOrder:Number(b.sortOrder||0)}}))}catch{return NextResponse.json({error:'Category already exists'},{status:400})}}

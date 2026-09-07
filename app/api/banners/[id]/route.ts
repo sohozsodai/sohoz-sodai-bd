@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server';import {prisma} from '@/lib/prisma';
+export async function PUT(req:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;const b=await req.json();return NextResponse.json(await prisma.banner.update({where:{id:Number(id)},data:{title:b.title,subtitle:b.subtitle||null,image:b.image,buttonText:b.buttonText||'পণ্য দেখুন',buttonLink:b.buttonLink||'/#products',active:!!b.active,sortOrder:Number(b.sortOrder||0)}}))}
+export async function DELETE(_:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;await prisma.banner.delete({where:{id:Number(id)}});return NextResponse.json({ok:true})}

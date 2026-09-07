@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server';import {prisma} from '@/lib/prisma';import {slugify} from '@/lib/data';
+export async function PUT(req:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;const b=await req.json();return NextResponse.json(await prisma.subcategory.update({where:{id:Number(id)},data:{name:b.name,slug:slugify(b.slug||b.name),active:!!b.active,sortOrder:Number(b.sortOrder||0)}}))}
+export async function DELETE(_:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;await prisma.subcategory.delete({where:{id:Number(id)}});return NextResponse.json({ok:true})}
