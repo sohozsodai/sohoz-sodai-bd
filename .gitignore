@@ -6,3 +6,5 @@ dev.db
 dev.db-journal
 public/uploads/
 *.zip
+.vercel
+.env.production
