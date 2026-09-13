@@ -1,0 +1,40 @@
+ 'use client';
+import {useState} from 'react';
+import {arr,money} from '@/lib/data';
+import {useCart} from './cart';
+import Link from 'next/link';
+import {useRouter} from 'next/navigation';
+
+export default function ProductDetails({p}:{p:any}){
+  const {add,buyNow}=useCart();
+  const router=useRouter();
+  const imgs=[p.image,...arr(p.images)].filter(Boolean);
+  const [active,setActive]=useState(imgs[0]);
+
+  const directOrder=()=>{
+    if(!p.active||p.stock<1)return;
+    buyNow(p);
+    router.push('/checkout');
+  };
+
+  return <main className="section"><div className="detail">
+    <div>
+      <div className="mainImg">{active?<img src={active} alt={p.name}/>:<div className="placeholder">ছবি নেই</div>}</div>
+      <div className="thumbs">{imgs.map((x,i)=><button key={i} onClick={()=>setActive(x)}><img src={x} alt=""/></button>)}</div>
+    </div>
+    <div className="detailInfo">
+      <div className="muted">{p.category} {p.subcategory?' / '+p.subcategory:''}</div>
+      <h1>{p.name}</h1>
+      <div className="price big"><strong>{money(p.salePrice)}</strong>{p.regularPrice>p.salePrice?<del>{money(p.regularPrice)}</del>:null}</div>
+      <p>{p.details}</p>
+      <p><b>SKU:</b> {p.sku} · <b>স্টক:</b> {p.stock}</p>
+      {arr(p.sizes).length?<p><b>সাইজ:</b> {arr(p.sizes).join(', ')}</p>:null}
+      {arr(p.colors).length?<p><b>রং:</b> {arr(p.colors).join(', ')}</p>:null}
+      <div className="detailActions">
+        <button className="primary" disabled={!p.active||p.stock<1} onClick={()=>add(p)}>কার্টে যোগ করুন</button>
+        <button className="buyNowLarge" disabled={!p.active||p.stock<1} onClick={directOrder}>এখনই অর্ডার করুন</button>
+        <Link className="secondary" href="/cart">কার্ট দেখুন</Link>
+      </div>
+    </div>
+  </div></main>
+}

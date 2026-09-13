@@ -1,0 +1,184 @@
+import { prisma } from '@/lib/prisma';
+import StoreHeader from '@/components/StoreHeader';
+import ProductCard from '@/components/ProductCard';
+import HeroSlider from '@/components/HeroSlider';
+import ShopFilters from '@/components/ShopFilters';
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    q?: string;
+    category?: string;
+    sort?: string;
+  }>;
+}) {
+  const sp = await searchParams;
+
+  const q = (sp.q || '').trim();
+  const category = sp.category || '';
+  const sort = sp.sort || 'new';
+
+  const where: any = {
+    active: true,
+  };
+
+  if (q) {
+    where.OR = [
+      { name: { contains: q } },
+      { sku: { contains: q } },
+      { details: { contains: q } },
+    ];
+  }
+
+  if (category) {
+    where.category = category;
+  }
+
+  const orderBy: any =
+    sort === 'low'
+      ? { salePrice: 'asc' }
+      : sort === 'high'
+        ? { salePrice: 'desc' }
+        : { createdAt: 'desc' };
+
+  const [
+    products,
+    s,
+    banners,
+    categories,
+    featured,
+    offers,
+  ] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      orderBy,
+    }),
+
+    prisma.setting.upsert({
+      where: { id: 1 },
+      update: {},
+      create: { id: 1 },
+    }),
+
+    prisma.banner.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: 'asc' },
+    }),
+
+    prisma.category.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: 'asc' },
+    }),
+
+    prisma.product.findMany({
+      where: {
+        active: true,
+        featured: true,
+      },
+      take: 8,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    }),
+
+    prisma.product.findMany({
+      where: {
+        active: true,
+        offer: true,
+      },
+      take: 8,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    }),
+  ]);
+
+  return (
+    <>
+      <StoreHeader settings={s} />
+
+      <main>
+        <HeroSlider banners={banners} fallback={s} />
+
+        {featured.length ? (
+          <section className="section">
+            <div className="sectionHead">
+              <div>
+                <span className="eyebrow">Selected for you</span>
+                <h2>{s.featuredSectionTitle}</h2>
+              </div>
+            </div>
+
+            <div className="grid">
+              {featured.map((p) => (
+                <ProductCard key={p.id} p={p} />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {offers.length ? (
+          <section className="section offerSection">
+            <div className="sectionHead">
+              <div>
+                <span className="eyebrow">সাশ্রয়ী কেনাকাটা</span>
+                <h2>{s.offerSectionTitle}</h2>
+              </div>
+            </div>
+
+            <div className="grid">
+              {offers.map((p) => (
+                <ProductCard key={p.id} p={p} />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <section id="products" className="section">
+          <div className="sectionHead">
+            <div>
+              <span className="eyebrow">অনলাইন শপ</span>
+              <h2>{s.productSectionTitle}</h2>
+            </div>
+          </div>
+
+          <ShopFilters categories={categories} />
+
+          <div className="grid">
+            {products.map((p) => (
+              <ProductCard key={p.id} p={p} />
+            ))}
+          </div>
+
+          {products.length === 0 ? (
+            <div className="empty">
+              আপনার search/filter অনুযায়ী কোনো পণ্য পাওয়া যায়নি।
+            </div>
+          ) : null}
+        </section>
+      </main>
+
+      <footer>
+        <div className="footerInner">
+          <div>
+            <b>{s.storeName}</b>
+            <p>{s.footerText}</p>
+          </div>
+
+          <div>
+            <b>যোগাযোগ</b>
+            <p>
+              📞 {s.phone} · WhatsApp: {s.whatsapp}
+            </p>
+            <p>{s.email}</p>
+          </div>
+        </div>
+
+        <div className="copyright">
+          © {new Date().getFullYear()} {s.storeName}
+        </div>
+      </footer>
+    </>
+  );
+}

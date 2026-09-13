@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server';import {prisma} from '@/lib/prisma';
+export async function GET(){return NextResponse.json(await prisma.banner.findMany({orderBy:[{sortOrder:'asc'},{id:'desc'}]}))}
+export async function POST(req:Request){const b=await req.json();if(!b.title||!b.image)return NextResponse.json({error:'Title ও image লাগবে'},{status:400});return NextResponse.json(await prisma.banner.create({data:{title:b.title,subtitle:b.subtitle||null,image:b.image,buttonText:b.buttonText||'পণ্য দেখুন',buttonLink:b.buttonLink||'/#products',active:b.active!==false,sortOrder:Number(b.sortOrder||0)}}))}

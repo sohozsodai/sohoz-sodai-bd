@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {prisma} from '@/lib/prisma';import {slugify} from '@/lib/data';
+export async function POST(req:Request){const b=await req.json();if(!b.name||!b.categoryId)return NextResponse.json({error:'তথ্য অসম্পূর্ণ'},{status:400});try{return NextResponse.json(await prisma.subcategory.create({data:{name:b.name.trim(),slug:slugify(b.slug||b.name),categoryId:Number(b.categoryId),active:b.active!==false,sortOrder:Number(b.sortOrder||0)}}))}catch{return NextResponse.json({error:'Sub-category already exists'},{status:400})}}

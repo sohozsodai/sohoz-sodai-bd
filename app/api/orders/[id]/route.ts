@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server';import {prisma} from '@/lib/prisma';
+export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;const o=await prisma.order.findUnique({where:{id:Number(id)},include:{customer:true}});return o?NextResponse.json(o):NextResponse.json({error:'not found'},{status:404})}
+export async function PUT(req:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;const b=await req.json();const allowed=['PENDING','CONFIRMED','PROCESSING','DELIVERED','CANCELLED'];if(!allowed.includes(b.status))return NextResponse.json({error:'Invalid status'},{status:400});return NextResponse.json(await prisma.order.update({where:{id:Number(id)},data:{status:b.status}}))}

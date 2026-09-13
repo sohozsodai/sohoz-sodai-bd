@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server';import {prisma} from '@/lib/prisma';
+export async function GET(){return NextResponse.json(await prisma.deliveryArea.findMany({orderBy:[{sortOrder:'asc'},{name:'asc'}]}))}
+export async function POST(req:Request){const b=await req.json();if(!b.name)return NextResponse.json({error:'Area name required'},{status:400});try{return NextResponse.json(await prisma.deliveryArea.create({data:{name:b.name.trim(),charge:Number(b.charge||0),active:b.active!==false,sortOrder:Number(b.sortOrder||0)}}))}catch{return NextResponse.json({error:'Area already exists'},{status:400})}}
